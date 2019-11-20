@@ -1,0 +1,210 @@
+#+title: Eventually, I'll talk about WebAssembly
+#+author: Dhruv Dhamani
+
+#+OPTIONS: toc:nil reveal_height:1080 reveal_width:1920 nums:nil
+
+#+REVEAL_TITLE_SLIDE: <h1>%t</h1>
+
+#+reveal_root: https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.8.0/
+
+#+reveal_theme: simple
+#+REVEAL_EXTRA_JS: {src: "./script.js"}
+
+
+* Contents
+
+- Native Code
+- Ahead-of-time Compilers
+- Virtual Machines
+- Just-in-time compilers
+- WebAssembly
+
+* Native Code
+
+** Is everyone happy with native code?
+
+- It's set in stone.
+- There's trust, security issues.
+- It's /native/, thusly not portable.
+
+* Compilers
+# what is the point of compilers?
+# why do we use them.
+** How does one optimize?
+# a generic way to look at how one optimizes to think of it like a pattern
+# finding problem, you look for patterns of writing code that is usually slow,
+# and then you replace that pattern with a more performant pattern.
+
+# the problem with this is that there is a million ways to write code that does
+# the same thing, so it is not easy to write an optimizing compiler that is
+# actually good, which is why there exist only a few major, well-performant
+# optimizing compilers.
+
+# so what you want to do is before you start attempting to find patterns in code
+# that can be optimized you need to make your code more uniform and simple.
+
+** LISP
+Abbreviation for list processor.
+
+- ~(+ 10 10)~
+
+- ~(+ (+ 1 2)~
+  ~(* 3 3))~
+- ~// (1+ 2) + (3 * 3)~
+** 1. Parse source code into an Abstract Syntax Tree
+# you start by parsing your source code into an abstract syntax tree
+
+- ~(+ 10 10)~
+  #+BEGIN_SRC
+       add
+       / \
+      /   \
+     10   10
+  #+END_SRC
+- ~(+ (- 5 3) (* 10 2))~
+  - Equivalent to (5 - 3) + (10 * 2)
+  #+BEGIN_SRC
+        add
+       /   \
+      /     \
+    sub     mul
+    / \     / \
+   /   \   /   \
+  5     3 10    2
+  #+END_SRC
+
+** 2. And then you turn the tree into a simplified representation of the code.
+- For GCC this simplified representation is called GIMPLE.
+  - use ~-fdump-tree-gimple~ to generate GIMPLE for your source code.
+  - [[https://www.cse.iitb.ac.in/~uday/courses/cs715-09/gcc-gimple.pdf][Slides on GIMPLE IR]]
+- For CLang this simplified representation is called LLVM IR.
+  - use ~-emit-llvm~ to emit LLVM IR.
+  #+BEGIN_SRC c
+int mul_add(int x, int y, int z) {
+  return x * y + z;
+}
+  #+END_SRC
+  #+BEGIN_SRC llvm-ir
+define i32 @mul_add(i32 %x, i32 %y, i32 %z) {
+entry:
+  %tmp = mul i32 %x, %y
+  %tmp2 = add i32 %tmp, %z
+  ret i32 %tmp2
+}
+  #+END_SRC
+
+** 3. You run a bunch of optimization passes on the simplified code.
+
+** 4. You generate machine code for the target architecture.
+
+** GNU Compiler Collection Overview
+
+[[./gcc.jpg]]
+
+** It's not easy to do, so there's not many front-ends.
+Currently, the major front-ends are -
+- C
+- C++
+- Objective-C
+- FORTRAN
+- Ada
+- Go
+- D
+
+** Clang, designed with modularity in mind.
+[[./clang.jpeg]]
+
+Has front-ends for Ada, C, C++, D, Delphi, FORTRAN, Haskell, Julia, Objective-C, Rust, and Swift.
+
+
+** LLVM
+- An optimizer for LLVM IR.
+- Abbreviation for Low Level Virtual Machine.
+- Why Virtual Machine?
+
+** What if we distribute LLVM IR instead of binaries?
+
+ 
+** What if we distribute LLVM IR instead of binaries?
+- *It's set in stone.*
+- There's trust, security issues.
+- *It's /native/, thusly not portable.*
+
+** Problems with distributing LLVM IR -
+- LLVM IR was not designed to be distributed, it changes constantly to
+  accommodate new optimization passes or modifications to existing ones.
+- It takes too long to optimize and assemble to native code.
+  - If you cache its kinda the same as having native code set in stone.
+- Still trust and security issues.
+
+** Other virtual machines.
+- Java's Virtual Machine.
+- Microsoft's Common Language Run-time.
+- Python run-times.
+- Julia run-times.
+- JavaScript Engines in browsers.
+
+** Other virtual machines.
+|---------------------------------------+---------------------------------------------------------------|
+| Java's Virtual Machine.               | (/too much Java/)                                             |
+| Microsoft's Common Language Run-time. | (/too much Microsoft/)                                        |
+| Python run-time.                      | (/too slow, too python-y/)                                    |
+| Julia run-time.                       | (/specializes in scientific computing, too much like python/) |
+| JavaScript Engines in browsers.       | (/too slow, no one likes JavaScript/)                         |
+
+* Just-in-time Compilers
+** Just-in-time Compilers
+[[./jit_1.jpg]]
+** Just-in-time Compilers
+[[./jit_2.jpg]]
+** Just-in-time Compilers
+[[./jit_3.jpg]]
+
+* WebAssembly
+- You embed the VM in the browser,
+- And you can run native code there!
+
+**  WebAssembly is a virtual machine.
+- You embed the VM in the browser,
+- And you can run +native code+ there!
+- And you can run WebAssembly code there!
+- Two formats
+  - WebAssembly Text format (WAT)
+  - WebAssembly Byte-code format (WASM)
+
+** WebAssembly Text Format
+
+#+Begin_src elisp
+(module
+    (import "wasi_unstable" "fd_write" (func $fd_write (param i32 i32 i32 i32) (result i32)))
+
+    (memory 1)
+    (export "memory" (memory 0))
+
+    (data (i32.const 8) "hello world\n")
+
+    (func $main (export "_start")
+        (i32.store (i32.const 0) (i32.const 8))
+        (i32.store (i32.const 4) (i32.const 12))
+
+        (call $fd_write
+            (i32.const 1)
+            (i32.const 0)
+            (i32.const 1)
+            (i32.const 20)
+        )
+        drop
+    )
+
+    )
+#+end_src
+
+** WebAssembly is a back-end for your compiler
+- So instead of compiling for say ~gnu-linux-x86_64~,
+- You compile for ~wasm32~ or just ~wasm~.
+
+* Benefits
+1. Fast to compile, fast to actually run
+2. Portable
+3. Polyglot
+4. Secure
