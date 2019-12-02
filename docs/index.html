@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>Eventually, I&rsquo;ll talk about WebAssembly</title>
+<title>Why my Project is pointless</title>
 <meta name="author" content="Dhruv Dhamani"/>
 <style type="text/css">
 .underline { text-decoration: underline; }
@@ -26,19 +26,33 @@
 <div class="reveal">
 <div class="slides">
 <section id="sec-title-slide">
-<h1>Eventually, I&rsquo;ll talk about WebAssembly</h1>
+<h1>Why my Project is pointless</h1>
 </section>
-
 
 <section>
 <section id="slide-1">
-<h2 id="1"><span class="section-number-2">1</span> Contents</h2>
+<h2 id="1"><span class="section-number-2">1</span> Natural Language Understanding</h2>
 <ul>
-<li>Native Code</li>
-<li>Ahead-of-time Compilers</li>
-<li>Virtual Machines</li>
-<li>Just-in-time compilers</li>
-<li>WebAssembly</li>
+<li>A subtask of Natural Language Understanding that deal with machine reading</li>
+
+</ul>
+<p>
+comprehension.
+</p>
+<ul>
+<li>Consider the sentence - <code>Charlotte is in North Carolina.</code></li>
+<li>If a program can successfuly carry out NLU, you&rsquo;d expect it to comprehend
+that Charlotte is in fact in North Carolina.</li>
+<li>How do you know if your program comprehended the meaning successfully?
+<ul>
+<li>You ask it a question!
+<ul>
+<li><code>Where is Charlotte?</code></li>
+<li><code>Is Charlotte in NC?</code></li>
+
+</ul></li>
+
+</ul></li>
 
 </ul>
 
@@ -46,16 +60,10 @@
 </section>
 <section>
 <section id="slide-2">
-<h2 id="2"><span class="section-number-2">2</span> Native Code</h2>
-<div class="outline-text-2" id="text-2">
-</div>
-</section>
-<section id="slide-2-1">
-<h3 id="2-1"><span class="section-number-3">2.1</span> Is everyone happy with native code?</h3>
+<h2 id="2"><span class="section-number-2">2</span> Natural Language Understanding</h2>
 <ul>
-<li>It&rsquo;s set in stone.</li>
-<li>There&rsquo;s trust, security issues.</li>
-<li>It&rsquo;s <i>native</i>, thusly not portable.</li>
+<li>Generative Language Models can potentially implicitly solve this problem, without any
+task-specific training.</li>
 
 </ul>
 
@@ -63,344 +71,135 @@
 </section>
 <section>
 <section id="slide-3">
-<h2 id="3"><span class="section-number-2">3</span> Compilers</h2>
-</section>
-<section id="slide-3-1">
-<h3 id="3-1"><span class="section-number-3">3.1</span> How does one optimize?</h3>
-
-</section>
-<section id="slide-3-2">
-<h3 id="3-2"><span class="section-number-3">3.2</span> LISP</h3>
-<p>
-Abbreviation for list processor.
-</p>
-
+<h2 id="3"><span class="section-number-2">3</span> An example.</h2>
 <ul>
-<li><code>(+ 10 10)</code></li>
-
-<li><code>(+ (+ 1 2)</code>
-<code>(* 3 3))</code></li>
-<li><code>// (1+ 2) + (3 * 3)</code></li>
+<li>Book a spot for three at Maid-Rite Sandwich Shop in Antigua and Barbuda. I&rsquo;ll
+book a table for you at [&#x2026;]</li>
+<li>Book a spot for three at Maid-Rite Sandwich Shop in Antigua and Barbuda. Which
+place? [&#x2026;]</li>
+<li>Book a spot for three at Maid-Rite Sandwich Shop in Antigua and Barbuda. I&rsquo;ll
+book a table for [&#x2026;]</li>
 
 </ul>
-</section>
-<section id="slide-3-3">
-<h3 id="3-3"><span class="section-number-3">3.3</span> 1. Parse source code into an Abstract Syntax Tree</h3>
-<ul>
-<li><p>
-<code>(+ 10 10)</code>
-</p>
-<pre  class="example">
-       add
-       / \
-      /   \
-     10   10
-</pre></li>
-<li><p>
-<code>(+ (- 5 3) (* 10 2))</code>
-</p>
-<ul>
-<li>Equivalent to (5 - 3) + (10 * 2)</li>
-
-</ul>
-<pre  class="example">
-        add
-       /   \
-      /     \
-    sub     mul
-    / \     / \
-   /   \   /   \
-  5     3 10    2
-</pre></li>
-
-</ul>
-
-</section>
-<section id="slide-3-4">
-<h3 id="3-4"><span class="section-number-3">3.4</span> 2. And then you turn the tree into a simplified representation of the code.</h3>
-<ul>
-<li>For GCC this simplified representation is called GIMPLE.
-<ul>
-<li>use <code>-fdump-tree-gimple</code> to generate GIMPLE for your source code.</li>
-<li><a href="https://www.cse.iitb.ac.in/~uday/courses/cs715-09/gcc-gimple.pdf">Slides on GIMPLE IR</a></li>
-
-</ul></li>
-<li><p>
-For CLang this simplified representation is called LLVM IR.
-</p>
-<ul>
-<li>use <code>-emit-llvm</code> to emit LLVM IR.</li>
-
-</ul>
-<div class="org-src-container">
-
-<pre  class="src src-c"><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">mul_add</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">x</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">y</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">z</span>) {
-  <span style="color: #51afef;">return</span> x * y + z;
-}
-</pre>
-</div>
-<div class="org-src-container">
-
-<pre  class="src src-llvm-ir">define i32 @mul_add(i32 %x, i32 %y, i32 %z) {
-entry:
-  %tmp = mul i32 %x, %y
-  %tmp2 = add i32 %tmp, %z
-  ret i32 %tmp2
-}
-</pre>
-</div></li>
-
-</ul>
-
-</section>
-<section id="slide-3-5">
-<h3 id="3-5"><span class="section-number-3">3.5</span> 3. You run a bunch of optimization passes on the simplified code.</h3>
-
-</section>
-<section id="slide-3-6">
-<h3 id="3-6"><span class="section-number-3">3.6</span> 4. You generate machine code for the target architecture.</h3>
-
-</section>
-<section id="slide-3-7">
-<h3 id="3-7"><span class="section-number-3">3.7</span> GNU Compiler Collection Overview</h3>
-
-<div class="figure">
-<p><img src="./gcc.jpg" alt="gcc.jpg" />
-</p>
-</div>
-
-</section>
-<section id="slide-3-8">
-<h3 id="3-8"><span class="section-number-3">3.8</span> It&rsquo;s not easy to do, so there&rsquo;s not many front-ends.</h3>
-<p>
-Currently, the major front-ends are -
-</p>
-<ul>
-<li>C</li>
-<li>C++</li>
-<li>Objective-C</li>
-<li>FORTRAN</li>
-<li>Ada</li>
-<li>Go</li>
-<li>D</li>
-
-</ul>
-
-</section>
-<section id="slide-3-9">
-<h3 id="3-9"><span class="section-number-3">3.9</span> Clang, designed with modularity in mind.</h3>
-
-<div class="figure">
-<p><img src="./clang.jpeg" alt="clang.jpeg" />
-</p>
-</div>
-
-<p>
-Has front-ends for Ada, C, C++, D, Delphi, FORTRAN, Haskell, Julia, Objective-C, Rust, and Swift.
-</p>
-
-
-</section>
-<section id="slide-3-10">
-<h3 id="3-10"><span class="section-number-3">3.10</span> LLVM</h3>
-<ul>
-<li>An optimizer for LLVM IR.</li>
-<li>Abbreviation for Low Level Virtual Machine.</li>
-<li>Why Virtual Machine?</li>
-
-</ul>
-
-</section>
-<section id="slide-3-11">
-<h3 id="3-11"><span class="section-number-3">3.11</span> What if we distribute LLVM IR instead of binaries?</h3>
-
-
-</section>
-<section id="slide-3-12">
-<h3 id="3-12"><span class="section-number-3">3.12</span> What if we distribute LLVM IR instead of binaries?</h3>
-<ul>
-<li><b>It&rsquo;s set in stone.</b></li>
-<li>There&rsquo;s trust, security issues.</li>
-<li><b>It&rsquo;s <i>native</i>, thusly not portable.</b></li>
-
-</ul>
-
-</section>
-<section id="slide-3-13">
-<h3 id="3-13"><span class="section-number-3">3.13</span> Problems with distributing LLVM IR -</h3>
-<ul>
-<li>LLVM IR was not designed to be distributed, it changes constantly to
-accommodate new optimization passes or modifications to existing ones.</li>
-<li>It takes too long to optimize and assemble to native code.
-<ul>
-<li>If you cache its kinda the same as having native code set in stone.</li>
-
-</ul></li>
-<li>Still trust and security issues.</li>
-
-</ul>
-
-</section>
-<section id="slide-3-14">
-<h3 id="3-14"><span class="section-number-3">3.14</span> Other virtual machines.</h3>
-<ul>
-<li>Java&rsquo;s Virtual Machine.</li>
-<li>Microsoft&rsquo;s Common Language Run-time.</li>
-<li>Python run-times.</li>
-<li>Julia run-times.</li>
-<li>JavaScript Engines in browsers.</li>
-
-</ul>
-
-</section>
-<section id="slide-3-15">
-<h3 id="3-15"><span class="section-number-3">3.15</span> Other virtual machines.</h3>
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="org-left" />
-
-<col  class="org-left" />
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left">Java&rsquo;s Virtual Machine.</td>
-<td class="org-left">(<i>too much Java</i>)</td>
-</tr>
-
-<tr>
-<td class="org-left">Microsoft&rsquo;s Common Language Run-time.</td>
-<td class="org-left">(<i>too much Microsoft</i>)</td>
-</tr>
-
-<tr>
-<td class="org-left">Python run-time.</td>
-<td class="org-left">(<i>too slow, too python-y</i>)</td>
-</tr>
-
-<tr>
-<td class="org-left">Julia run-time.</td>
-<td class="org-left">(<i>specializes in scientific computing, too much like python</i>)</td>
-</tr>
-
-<tr>
-<td class="org-left">JavaScript Engines in browsers.</td>
-<td class="org-left">(<i>too slow, no one likes JavaScript</i>)</td>
-</tr>
-</tbody>
-</table>
 
 </section>
 </section>
 <section>
 <section id="slide-4">
-<h2 id="4"><span class="section-number-2">4</span> Just-in-time Compilers</h2>
-<div class="outline-text-2" id="text-4">
-</div>
-</section>
-<section id="slide-4-1">
-<h3 id="4-1"><span class="section-number-3">4.1</span> Just-in-time Compilers</h3>
+<h2 id="4"><span class="section-number-2">4</span> An example.</h2>
+<ul>
+<li>Book a spot for three at Maid-Rite Sandwich Shop in Antigua and Barbuda. I&rsquo;ll
+book a table for you at <span class="underline">Maid-Rite Sandwich</span></li>
+<li>Book a spot for three at Maid-Rite Sandwich Shop in Antigua and Barbuda. Which
+place? <span class="underline">Maid-Rite Sandwich</span></li>
+<li>Book a spot for three at Maid-Rite Sandwich Shop in Antigua and Barbuda. I&rsquo;ll
+book a table for <span class="underline">three</span></li>
 
-<div class="figure">
-<p><img src="./jit_1.jpg" alt="jit_1.jpg" />
-</p>
-</div>
-</section>
-<section id="slide-4-2">
-<h3 id="4-2"><span class="section-number-3">4.2</span> Just-in-time Compilers</h3>
-
-<div class="figure">
-<p><img src="./jit_2.jpg" alt="jit_2.jpg" />
-</p>
-</div>
-</section>
-<section id="slide-4-3">
-<h3 id="4-3"><span class="section-number-3">4.3</span> Just-in-time Compilers</h3>
-
-<div class="figure">
-<p><img src="./jit_3.jpg" alt="jit_3.jpg" />
-</p>
-</div>
+</ul>
 
 </section>
 </section>
 <section>
 <section id="slide-5">
-<h2 id="5"><span class="section-number-2">5</span> WebAssembly</h2>
+<h2 id="5"><span class="section-number-2">5</span> RoBERTa</h2>
+<p>
+RoBERTa iterates on BERT&rsquo;s pretraining procedure, including training the model longer, with bigger batches over more data; removing the next sentence prediction objective; training on longer sequences; and dynamically changing the masking pattern applied to the training data.
+</p>
+
+
+</section>
+</section>
+<section>
+<section id="slide-6">
+<h2 id="6"><span class="section-number-2">6</span> RoBERTa</h2>
 <ul>
-<li>You embed the VM in the browser,</li>
-<li>And you can run native code there!</li>
+<li>Bi-directional masked language model.</li>
 
 </ul>
 
 </section>
-<section id="slide-5-1">
-<h3 id="5-1"><span class="section-number-3">5.1</span> WebAssembly is a virtual machine.</h3>
+</section>
+<section>
+<section id="slide-7">
+<h2 id="7"><span class="section-number-2">7</span> What I intended to do -</h2>
 <ul>
-<li>You embed the VM in the browser,</li>
-<li>And you can run <del>native code</del> there!</li>
-<li>And you can run WebAssembly code there!</li>
-<li>Two formats
+<li>Book a spot for three at Eve&rsquo;s Pizzeria. Which place? <code>&lt;mask&gt;</code></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-8">
+<h2 id="8"><span class="section-number-2">8</span> What I intended to do -</h2>
 <ul>
-<li>WebAssembly Text format (WAT)</li>
-<li>WebAssembly Byte-code format (WASM)</li>
+<li>Book a spot for three at Eve&rsquo;s Pizzeria. Which place? <code>&lt;mask&gt;</code></li>
+<li>Book a spot for three at Eve&rsquo;s Pizzeria. Which place? Eve&rsquo;s <code>&lt;mask&gt;</code></li>
+<li>Book a spot for three at Eve&rsquo;s Pizzeria. Which place? Eve&rsquo;s Pizzeria</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-9">
+<h2 id="9"><span class="section-number-2">9</span> What actually happens -</h2>
+<ul>
+<li>&lt;s&gt; Book a spot for three at Eve&rsquo;s Pizzeria. Which place? &lt;/s&gt;</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-10">
+<h2 id="10"><span class="section-number-2">10</span> What actually happens -</h2>
+<ul>
+<li>&lt;s&gt; Book a spot for three at Eve&rsquo;s Pizzeria. Which place? Eve&rsquo;s &lt;/s&gt;&lt;/s&gt;</li>
+<li>&lt;s&gt; Book a spot for three at Eve&rsquo;s Pizzeria. Which place? Eve&rsquo;s &lt;/s&gt;&lt;/s&gt;&lt;/s&gt;&lt;/s&gt;&lt;/s&gt;&lt;/s&gt;&lt;/s&gt;&lt;/s&gt;</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-11">
+<h2 id="11"><span class="section-number-2">11</span> How to get it to work -</h2>
+<ul>
+<li>Don&rsquo;t use a birdirectional masked language model.</li>
+<li>Examples of GPT2, a uni-directional transformer model trained for the same
+task -
+<ul>
+<li>add artist to All Out 70s . Where should I add ? All Out 70s</li>
+<li>Give the current  book a three . What is the rating ? three</li>
+<li><a href="https://colab.research.google.com/drive/1MGDjZDdgzxZtAI_KO2yDEOkRmX3jj2LD">https://colab.research.google.com/drive/1MGDjZDdgzxZtAI_KO2yDEOkRmX3jj2LD</a></li>
+
+</ul></li>
+<li>Do not use dynamic masking, as the orignal paper did, instead mask only the
+final answer.
+<ul>
+<li>What the paper did -
+<ul>
+<li>Book a <code>&lt;mask&gt;</code> for three <code>&lt;mask&gt;</code> Eve&rsquo;s Pizzeria. Which place? Eve&rsquo;s
+Pizzeria.</li>
+
+</ul></li>
+<li>Instead, do -
+<ul>
+<li>Book a spot for three at Eve&rsquo;s Pizzeria. Which place? <code>&lt;mask&gt;
+     &lt;mask&gt;</code></li>
+
+</ul></li>
 
 </ul></li>
 
 </ul>
 
 </section>
-<section id="slide-5-2">
-<h3 id="5-2"><span class="section-number-3">5.2</span> WebAssembly Text Format</h3>
-<div class="org-src-container">
-
-<pre  class="src src-elisp"><span style="color: #51afef;">(</span>module
-    <span style="color: #c678dd;">(</span>import <span style="color: #98be65;">"wasi_unstable"</span> <span style="color: #98be65;">"fd_write"</span> <span style="color: #98be65;">(</span>func $fd_write <span style="color: #51afef;">(</span>param i32 i32 i32 i32<span style="color: #51afef;">)</span> <span style="color: #51afef;">(</span>result i32<span style="color: #51afef;">)</span><span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span>
-
-    <span style="color: #c678dd;">(</span>memory <span style="color: #da8548; font-weight: bold;">1</span><span style="color: #c678dd;">)</span>
-    <span style="color: #c678dd;">(</span>export <span style="color: #98be65;">"memory"</span> <span style="color: #98be65;">(</span>memory <span style="color: #da8548; font-weight: bold;">0</span><span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span>
-
-    <span style="color: #c678dd;">(</span>data <span style="color: #98be65;">(</span>i32.const <span style="color: #da8548; font-weight: bold;">8</span><span style="color: #98be65;">)</span> <span style="color: #98be65;">"hello world\n"</span><span style="color: #c678dd;">)</span>
-
-    <span style="color: #c678dd;">(</span>func $main <span style="color: #98be65;">(</span>export <span style="color: #98be65;">"_start"</span><span style="color: #98be65;">)</span>
-        <span style="color: #98be65;">(</span>i32.store <span style="color: #51afef;">(</span>i32.const <span style="color: #da8548; font-weight: bold;">0</span><span style="color: #51afef;">)</span> <span style="color: #51afef;">(</span>i32.const <span style="color: #da8548; font-weight: bold;">8</span><span style="color: #51afef;">)</span><span style="color: #98be65;">)</span>
-        <span style="color: #98be65;">(</span>i32.store <span style="color: #51afef;">(</span>i32.const <span style="color: #da8548; font-weight: bold;">4</span><span style="color: #51afef;">)</span> <span style="color: #51afef;">(</span>i32.const <span style="color: #da8548; font-weight: bold;">12</span><span style="color: #51afef;">)</span><span style="color: #98be65;">)</span>
-
-        <span style="color: #98be65;">(</span>call $fd_write
-            <span style="color: #51afef;">(</span>i32.const <span style="color: #da8548; font-weight: bold;">1</span><span style="color: #51afef;">)</span>
-            <span style="color: #51afef;">(</span>i32.const <span style="color: #da8548; font-weight: bold;">0</span><span style="color: #51afef;">)</span>
-            <span style="color: #51afef;">(</span>i32.const <span style="color: #da8548; font-weight: bold;">1</span><span style="color: #51afef;">)</span>
-            <span style="color: #51afef;">(</span>i32.const <span style="color: #da8548; font-weight: bold;">20</span><span style="color: #51afef;">)</span>
-        <span style="color: #98be65;">)</span>
-        drop
-    <span style="color: #c678dd;">)</span>
-
-    <span style="color: #51afef;">)</span>
-</pre>
-</div>
-
-</section>
-<section id="slide-5-3">
-<h3 id="5-3"><span class="section-number-3">5.3</span> WebAssembly is a back-end for your compiler</h3>
-<ul>
-<li>So instead of compiling for say <code>gnu-linux-x86_64</code>,</li>
-<li>You compile for <code>wasm32</code> or just <code>wasm</code>.</li>
-
-</ul>
-
-</section>
 </section>
 <section>
-<section id="slide-6">
-<h2 id="6"><span class="section-number-2">6</span> Benefits</h2>
-<ol>
-<li>Fast to compile, fast to actually run</li>
-<li>Portable</li>
-<li>Polyglot</li>
-<li>Secure</li>
-
-</ol>
+<section id="slide-12">
+<h2 id="12"><span class="section-number-2">12</span> Any questions?</h2>
 </section>
 </section>
 </div>
